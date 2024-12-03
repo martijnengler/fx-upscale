@@ -81,8 +81,15 @@ import Upscaling
             "using codec: \(outputCodec?.rawValue ?? "hevc")"
         ].joined())
         ProgressBar.start(progress: exportSession.progress)
-        try await exportSession.export()
-        ProgressBar.stop()
-        CommandLine.success("Video successfully upscaled!")
+
+        do {
+            try await exportSession.export()
+            ProgressBar.stop()
+            CommandLine.success("Video successfully upscaled!")
+            Self.exit(withError: nil)
+        } catch {
+            CommandLine.warn("Export failed with error: \(error)")
+            Self.exit(withError: ExitCode.failure)
+        }
     }
 }
