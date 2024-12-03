@@ -11,7 +11,8 @@ public class UpscalingExportSession {
         outputCodec: AVVideoCodecType? = nil,
         preferredOutputURL: URL,
         outputSize: CGSize,
-        creator: String? = nil
+        creator: String? = nil,
+        allowOverwrite: Bool = false
     ) {
         self.asset = asset
         self.outputCodec = outputCodec
@@ -24,6 +25,7 @@ public class UpscalingExportSession {
         }
         self.outputSize = outputSize
         self.creator = creator
+        self.allowOverwrite = allowOverwrite
         progress = Progress(parent: nil, userInfo: [
             .fileURLKey: outputURL
         ])
@@ -43,12 +45,17 @@ public class UpscalingExportSession {
     public let outputURL: URL
     public let outputSize: CGSize
     public let creator: String?
+    public let allowOverwrite: Bool
 
     public let progress: Progress
 
     public func export() async throws {
-        guard !FileManager.default.fileExists(atPath: outputURL.path(percentEncoded: false)) else {
-            throw Error.outputURLAlreadyExists
+        if FileManager.default.fileExists(atPath: outputURL.path(percentEncoded: false)) {
+            guard allowOverwrite else {
+                throw Error.outputURLAlreadyExists
+            }
+
+            try FileManager.default.removeItem(at: outputURL)
         }
 
         let outputFileType: AVFileType = {

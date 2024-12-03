@@ -12,6 +12,7 @@ import Upscaling
     @Option(name: .shortAndLong, help: "The output file width") var width: Int?
     @Option(name: .shortAndLong, help: "The output file height") var height: Int?
     @Option(name: .shortAndLong, help: "Output codec: 'hevc', 'prores', or 'h264' (default: hevc)") var codec: String = "hevc"
+    @Flag(name: .shortAndLong, help: "Overwrite output file without prompting") var overwrite: Bool = false
 
     mutating func run() async throws {
         guard ["mov", "m4v", "mp4"].contains(url.pathExtension.lowercased()) else {
@@ -72,7 +73,8 @@ import Upscaling
             outputCodec: convertToProRes ? .proRes422 : outputCodec,
             preferredOutputURL: url.renamed { "\($0) Upscaled" },
             outputSize: outputSize,
-            creator: ProcessInfo.processInfo.processName
+            creator: ProcessInfo.processInfo.processName,
+            allowOverwrite: overwrite
         )
 
         CommandLine.info([
